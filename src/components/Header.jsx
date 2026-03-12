@@ -25,7 +25,7 @@ const Header = () => {
             </address>
             <img src={logo}/>
             <div className="shopacc">
-                {user && <Link to="/cart"><FaShoppingCart />{totalQuantity > 0 && <span>({totalQuantity})</span>}</Link>}
+                {user && <Link to="/cart" className="cart"><FaShoppingCart />{totalQuantity > 0 && <span className="cart-quantity">{totalQuantity > 9 ? "+9" : totalQuantity}</span>}</Link>}
                 {!user ? (
                     <Link to="/login"><MdAccountCircle/></Link>
                 ) : (

@@ -17,12 +17,12 @@ const Cart = () => {
     };
 
     const handleOrder = () => {
-        const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+        const currentUser = JSON.parse(localStorage.getItem("currentUser")) || JSON.parse(sessionStorage.getItem("currentUser"));
         if (!currentUser) {
             alert("Musisz być zalogowany!");
             return;
         }
-        if (cart.lenght === 0) return;
+        if (cart.length === 0) return;
         if (!pickupTime) {
             alert("Wybierz godzinę odbioru!");
             return;

@@ -10,7 +10,7 @@ const Nav = () => {
     const { user } = useContext(AuthContext);
     return (
         <nav>
-            <Link to="/">Strona Główna <IoMdHome className="navicon"/></Link>
+            <Link to="/">Strona Główna <IoMdHome className="navicon" /></Link>
             <Link to="/menu">Menu <MdOutlineMenuBook className="navicon" /></Link>
             <Link to="/contact">Kontakt <FaEnvelope className="navicon" /></Link>
         </nav>

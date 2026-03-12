@@ -57,7 +57,11 @@ export function AuthProvider({children}) {
         localStorage.setItem("users", JSON.stringify(updated));
         const newUser = { ...user, ...changes };
         setUser(newUser);
-        localStorage.setItem("currentUser", JSON.stringify(newUser));
+        if (localStorage.getItem("currentUser")) {
+            localStorage.setItem("currentUser", JSON.stringify(newUser));
+        } else {
+            sessionStorage.setItem("currentUser", JSON.stringify(newUser));
+    }
     };
 
     const deleteAccount = () => {

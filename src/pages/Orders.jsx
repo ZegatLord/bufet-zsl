@@ -8,7 +8,7 @@ const Orders = () => {
     useEffect(() => {
         const loadOrders = () => {
             const savedOrders = JSON.parse(localStorage.getItem("orders")) || [];
-            const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+            const currentUser = JSON.parse(localStorage.getItem("currentUser")) || JSON.parse(sessionStorage.getItem("currentUser"));
 
             if (!currentUser) {
                 setOrders([]);
@@ -28,7 +28,7 @@ const Orders = () => {
         const handleStorageChange = (event) => {
             if (event.key === "orders") {
                 const newOrders = JSON.parse(event.newValue) || [];
-                const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+                const currentUser = JSON.parse(localStorage.getItem("currentUser")) || JSON.parse(sessionStorage.getItem("currentUser"));
                 const userOrders = newOrders.filter((order) => order.userId === currentUser?.id);
 
                 userOrders.forEach((order) => {
