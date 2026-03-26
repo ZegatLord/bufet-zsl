@@ -1,0 +1,117 @@
+from flask import Flask, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///user.sqlite3'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(100), unique=True)
+    password = db.Column(db.String(100))
+    role = db.Column(db.String(10))
+
+class Order(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)
+    number = db.Column(db.String(50))
+    total = db.Column(db.Float)
+    pickup_time = db.Column(db.String(10))
+    status = db.Column(db.String(50))
+    date = db.Column(db.String(50))
+
+class OrderItem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer)
+    name = db.Column(db.String(100))
+    price = db.Column(db.Float)
+    quantity = db.Column(db.Integer)
+
+@app.route("/register", methods=["POST"])
+def register():
+    data = request.json
+    user = User(email=data["email"], password=data["password"], role="user")
+    db.session.add(user)
+    db.session.commit()
+    return jsonify({"msg": "ok"})
+
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.json
+    user = User.query.filter_by(email=data["email"], password=data["password"]).first()
+    
+    if user:
+        return jsonify({
+            "id": user.id,
+            "email": user.email,
+            "role": user.role
+        })
+    return jsonify({"error": "złe dane"}), 401
+
+@app.route("/orders", methods=["POST"])
+def add_order():
+    data = request.json
+
+    order = Order(
+        user_id=data["userId"],
+        number=data["number"],
+        total=data["total"],
+        pickup_time=data["pickupTime"],
+        status="Nowe",
+        date=data["date"]
+    )
+
+    db.session.add(order)
+    db.session.commit()
+
+    for item in data["items"]:
+        order_item = OrderItem(
+            order_id=order.id,
+            name=item["name"],
+            price=item["price"],
+            quantity=item["quantity"]
+        )
+        db.session.add(order_item)
+
+    db.session.commit()
+
+    return jsonify({"msg": "ok"})
+
+@app.route("/orders", methods=["GET"])
+def get_orders():
+    orders = Order.query.all()
+    result = []
+
+    for o in orders:
+        items = OrderItem.query.filter_by(order_id=o.id).all()
+        result.append({
+            "id": o.id,
+            "number": o.number,
+            "total": o.total,
+            "pickupTime": o.pickup_time,
+            "status": o.status,
+            "date": o.date,
+            "items": [
+                {"name": i.name, "price": i.price, "quantity": i.quantity}
+                for i in items
+            ]
+        })
+
+    return jsonify(result)
+
+if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
+
+        if not User.query.filter_by(email="admin@admin.com").first():
+            admin = User(email="admin@admin.com", password="admin123", role="admin")
+            db.session.add(admin)
+            db.session.commit()
+
+    app.run(debug=True)
